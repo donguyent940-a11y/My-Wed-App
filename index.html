@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web App Kiểm Tra 15 Phút Toán 8 - KNTT</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- KaTeX cho Công thức Toán -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4" id="app">
+
+    <!-- MÀN HÌNH ĐĂNG NHẬP -->
+    <div id="loginCard" class="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center text-blue-700 mb-2">ĐĂNG NHẬP HỆ THỐNG</h2>
+        <p class="text-center text-gray-500 text-sm mb-6">Kiểm tra 15 phút Toán 8 - Lớp 8A1</p>
+
+        <div id="loginError" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-sm">
+            Tên đăng nhập hoặc mật khẩu không đúng!
+        </div>
+
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập</label>
+                <input 
+                    type="text" 
+                    id="username"
+                    required 
+                    placeholder="VD: 8a1_1 hoặc teacher"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
+                <input 
+                    type="password" 
+                    id="password"
+                    required 
+                    placeholder="Ngày tháng năm sinh (VD: 18062013)"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                />
+            </div>
+            <button 
+                type="submit" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition text-sm"
+            >
+                Đăng nhập
+            </button>
+        </form>
+
+        <div class="mt-6 p-3 bg-gray-50 rounded text-xs text-gray-600 space-y-1">
+            <p class="font-bold mb-1">Cấu trúc tài khoản:</p>
+            <p>• <b>Tên đăng nhập:</b> <code>8a1_STT</code> (VD: <code>8a1_1</code>, <code>8a1_2</code>)</p>
+            <p>• <b>Mật khẩu:</b> Ngày sinh 8 số (VD: <code>18062013</code>)</p>
+            <p>• <b>Giáo viên:</b> <code>teacher</code> / Mật khẩu: <code>123</code></p>
+        </div>
+    </div>
+
+    <!-- MÀN HÌNH CHÍNH SAU ĐĂNG NHẬP -->
+    <div id="mainContent" class="hidden w-full max-w-5xl my-6">
+        <div class="bg-white p-4 rounded-xl shadow mb-6 flex justify-between items-center">
+            <div>
+                <span class="text-sm text-gray-500">Xin chào, </span>
+                <span id="userName" class="font-bold text-blue-700"></span>
+                <span id="userRole" class="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full"></span>
+            </div>
+            <button id="btnLogout" class="text-sm text-red-600 hover:underline font-medium">Đăng xuất</button>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow">
+            
+            <!-- GIAO DIỆN GIÁO VIÊN -->
+            <div id="teacherView" class="hidden space-y-8">
+                <!-- Quản lý Tạo đề -->
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">1. Tạo Ma Trận 20 Đề Thi Lớp 8A1 (15 Câu/Đề)</h3>
+                    
+                    <div class="flex flex-wrap gap-4 items-center justify-between mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Chọn chương kiểm tra:</label>
+                            <select id="chapterSelect" class="border rounded-md px-3 py-2 bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="Chương I: Đa thức">Chương I: Đa thức</option>
+                                <option value="Chương II: Hằng đẳng thức đáng nhớ">Chương II: Hằng đẳng thức đáng nhớ</option>
+                                <option value="Chương III: Tứ giác">Chương III: Tứ giác</option>
+                                <option value="Chương VI: Phân thức đại số">Chương VI: Phân thức đại số</option>
+                            </select>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button id="btnGenerateExam" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md shadow text-sm transition">
+                                🎲 Sinh bộ 20 đề (15 câu/đề)
+                            </button>
+                            <button id="btnPublishExam" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-md shadow text-sm transition">
+                                🚀 Phát hành đề cho Lớp 8A1
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="activeExamStatus" class="hidden mb-6 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-sm flex justify-between items-center">
+                        <span id="activeExamInfo"></span>
+                        <span class="text-xs bg-emerald-200 text-emerald-900 px-2 py-1 rounded font-semibold">Đã xuất bản</span>
+                    </div>
+
+                    <div id="examPreviewContainer">
+                        <div id="emptyPreview" class="text-center py-8 text-gray-400 border-2 border-dashed rounded-lg">
+                            Nhấn nút <b class="text-blue-600">"Sinh bộ 20 đề"</b> để tạo ma trận 20 đề ngẫu nhiên (chuẩn 15 câu/đề) cho chương đã chọn.
+                        </div>
+                        <div id="previewContent" class="hidden">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-bold text-gray-700">Xem trước Đề số 1 trong bộ 20 đề (15 câu)</h4>
+                                <button id="btnToggleAnswers" class="text-blue-600 hover:underline text-sm font-semibold">
+                                    👁️ Hiện đáp án & Lời giải
+                                </button>
+                            </div>
+                            <div id="questionsList" class="space-y-4 max-h-96 overflow-y-auto pr-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng Điểm Học Sinh Lớp 8A1 -->
+                <div>
+                    <div class="flex justify-between items-center mb-4 border-b pb-2">
+                        <h3 class="text-xl font-bold text-gray-800">2. Kết Quả Làm Bài Lớp 8A1</h3>
+                        <button id="btnRefreshScoreboard" class="bg-slate-200 hover:bg-slate-300 text-gray-800 text-xs px-3 py-1.5 rounded transition font-medium">
+                            🔄 Cập nhật bảng điểm
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto border rounded-xl shadow-sm">
+                        <table class="w-full text-sm text-left text-gray-600">
+                            <thead class="text-xs text-gray-700 uppercase bg-slate-100 border-b">
+                                <tr>
+                                    <th class="px-4 py-3 w-12 text-center">STT</th>
+                                    <th class="px-4 py-3">Họ và tên</th>
+                                    <th class="px-4 py-3 text-center">Ngày sinh</th>
+                                    <th class="px-4 py-3 text-center">Lượt thi</th>
+                                    <th class="px-4 py-3 text-center">Điểm cao nhất</th>
+                                    <th class="px-4 py-3 text-center">Thời gian làm bài</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scoreboardBody" class="divide-y">
+                                <!-- Dữ liệu điểm sẽ render tại đây -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GIAO DIỆN HỌC SINH -->
+            <div id="studentView" class="hidden">
+                <div id="noExamMessage" class="text-center py-12 text-gray-500">
+                    Chưa có đề thi nào được xuất bản. Vui lòng đợi giáo viên phát đề!
+                </div>
+
+                <div id="examStartCard" class="hidden text-center py-8">
+                    <div class="bg-blue-50 border border-blue-200 p-6 rounded-2xl max-w-lg mx-auto">
+                        <h3 id="studentExamTitle" class="text-xl font-bold text-blue-800 mb-2"></h3>
+                        <p class="text-gray-600 text-sm mb-4">Thời gian: 15 phút | Cấu trúc: <b>15 câu trắc nghiệm</b></p>
+                        
+                        <div class="bg-white p-4 rounded-xl shadow-inner mb-6 text-left text-sm space-y-2">
+                            <p class="text-gray-700">• Tối đa: <b>2 lần làm bài</b>.</p>
+                            <p class="text-gray-700">• Số lượt bạn đã làm: <b id="attemptsCount" class="text-blue-600">0/2</b></p>
+                            <p class="text-gray-700">• Điểm cao nhất: <b id="highestScore" class="text-emerald-600">Chưa có</b></p>
+                            <p class="text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 mt-2">
+                                🔀 Hệ thống bốc ngẫu nhiên 1 trong 20 đề thi và xáo trộn câu hỏi/đáp án.
+                            </p>
+                        </div>
+
+                        <button id="btnStartExam" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg transition text-base">
+                            🚀 Bắt đầu làm bài
+                        </button>
+                        <p id="maxAttemptsWarning" class="hidden text-red-600 font-bold mt-3 text-sm">Bạn đã dùng hết 2/2 lượt làm bài cho phép!</p>
+                    </div>
+                </div>
+
+                <!-- Khu vực làm bài -->
+                <div id="examArea" class="hidden">
+                    <div class="sticky top-0 bg-white border-b pb-4 mb-6 flex justify-between items-center z-10 pt-2">
+                        <div>
+                            <h3 id="currentAttemptTitle" class="text-lg font-bold text-blue-700"></h3>
+                            <p class="text-xs text-gray-500">Tổng số câu hỏi: <b class="text-blue-600">15/15 câu</b></p>
+                        </div>
+                        <div class="bg-red-50 border border-red-200 px-4 py-2 rounded-lg text-red-600 font-bold text-lg">
+                            ⏱️ <span id="timer">15:00</span>
+                        </div>
+                    </div>
+
+                    <div id="studentQuestionsList" class="space-y-6 mb-8"></div>
+
+                    <div class="text-center border-t pt-6">
+                        <button id="btnSubmitExam" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg transition text-base">
+                            📝 Nộp bài kiểm tra
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Màn hình kết quả -->
+                <div id="resultArea" class="hidden text-center py-8">
+                    <div class="bg-blue-50 border border-blue-200 p-8 rounded-2xl max-w-md mx-auto">
+                        <h3 class="text-2xl font-bold text-blue-800 mb-2">ĐÃ NỘP BÀI THÀNH CÔNG!</h3>
+                        
+                        <div class="bg-white p-6 rounded-xl shadow-inner mb-4">
+                            <span class="text-gray-500 text-sm block mb-1">Điểm số lượt thi này:</span>
+                            <span id="finalScore" class="text-4xl font-extrabold text-emerald-600">0/10</span>
+                            <p id="timeTakenDetail" class="text-xs text-blue-600 font-semibold mt-2"></p>
+                            <p id="correctDetail" class="text-xs text-gray-500 mt-1"></p>
+                        </div>
+
+                        <p class="text-xs text-amber-700 bg-amber-50 p-3 rounded border border-amber-200 mb-6">
+                            🔒 Đáp án chi tiết không được hiển thị theo quy định bảo mật đề kiểm tra.
+                        </p>
+
+                        <button id="btnReturnHome" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg text-sm transition">
+                            🔄 Quay lại trang chủ
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // CƠ SỞ DỮ LIỆU HỌC SINH LỚP 8A1
+        const USERS = [
+            { username: "teacher", password: "123", role: "teacher", name: "Thầy/Cô Giáo" },
+            { username: "8a1_1", password: "18062013", role: "student", name: "Nguyễn Thị Thùy An", dob: "18/06/2013" },
+            { username: "8a1_2", password: "18062013", role: "student", name: "Đỗ Lê Ngọc Anh", dob: "18/06/2013" },
+            { username: "8a1_3", password: "17062013", role: "student", name: "Hà Anh", dob: "17/06/2013" },
+            { username: "8a1_4", password: "18042013", role: "student", name: "Nguyễn Thiện Ân", dob: "18/04/2013" },
+            { username: "8a1_5", password: "01052013", role: "student", name: "Huỳnh Gia Bảo", dob: "01/05/2013" },
+            { username: "8a1_6", password: "22042013", role: "student", name: "Nguyễn Lê Thiên Châu", dob: "22/04/2013" },
+            { username: "8a1_7", password: "21022013", role: "student", name: "Trần Lê Dũng", dob: "21/02/2013" },
+            { username: "8a1_8", password: "25042013", role: "student", name: "Huỳnh Nguyễn Anh Duy", dob: "25/04/2013" },
+            { username: "8a1_9", password: "17062013", role: "student", name: "Bùi Đỗ Linh Dan", dob: "17/06/2013" },
+            { username: "8a1_10", password: "03032013", role: "student", name: "Nguyễn Thị Hương Giang", dob: "03/03/2013" },
+            { username: "8a1_11", password: "14012013", role: "student", name: "Nguyễn Thanh Hải", dob: "14/01/2013" },
+            { username: "8a1_12", password: "10022013", role: "student", name: "Nguyễn Lê Mai Hoàng", dob: "10/02/2013" },
+            { username: "8a1_13", password: "01042013", role: "student", name: "Lê Thu Huyền", dob: "01/04/2013" },
+            { username: "8a1_14", password: "23012013", role: "student", name: "Phạm Công Ngọc Hữu", dob: "23/01/2013" },
+            { username: "8a1_15", password: "16022013", role: "student", name: "Trần Gia Khánh", dob: "16/02/2013" },
+            { username: "8a1_16", password: "17012013", role: "student", name: "Lê Văn Đăng Khoa", dob: "17/01/2013" },
+            { username: "8a1_17", password: "23112013", role: "student", name: "Vũ Đăng Khôi", dob: "23/11/2013" },
+            { username: "8a1_18", password: "12042013", role: "student", name: "Dương Anh Kiệt", dob: "12/04/2013" },
+            { username: "8a1_19", password: "17082013", role: "student", name: "Lê Tuệ Lâm", dob: "17/08/2013" },
+            { username: "8a1_20", password: "17012013", role: "student", name: "Nguyễn Khánh Linh", dob: "17/01/2013" },
+            { username: "8a1_21", password: "19012013", role: "student", name: "Đặng Hoàng Tuấn Minh", dob: "19/01/2013" },
+            { username: "8a1_22", password: "09012013", role: "student", name: "Dương Hải My", dob: "09/01/2013" },
+            { username: "8a1_23", password: "25032013", role: "student", name: "Võ Hoàng Nhật Nam", dob: "25/03/2013" },
+            { username: "8a1_24", password: "03122013", role: "student", name: "Ngô Khôi Nguyên", dob: "03/12/2013" },
+            { username: "8a1_25", password: "01112013", role: "student", name: "Nguyễn Ngọc Hiền Nhi", dob: "01/11/2013" },
+            { username: "8a1_26", password: "18052013", role: "student", name: "Dương Bảo Nhiệm", dob: "18/05/2013" },
+            { username: "8a1_27", password: "10122013", role: "student", name: "Nguyễn Ngọc An Nhiên", dob: "10/12/2013" },
+            { username: "8a1_28", password: "17072013", role: "student", name: "Lý Ngọc Tâm Như", dob: "17/07/2013" },
+            { username: "8a1_29", password: "12072013", role: "student", name: "Nguyễn Tấn Phong", dob: "12/07/2013" },
+            { username: "8a1_30", password: "10112013", role: "student", name: "Trần Nguyễn Chấn Phong", dob: "10/11/2013" },
+            { username: "8a1_31", password: "25042013", role: "student", name: "Nguyễn Minh Quân", dob: "25/04/2013" },
+            { username: "8a1_32", password: "07112013", role: "student", name: "Phạm Mạnh Quân", dob: "07/11/2013" },
+            { username: "8a1_33", password: "23112013", role: "student", name: "Lê Thị Bảo Quyên", dob: "23/11/2013" },
+            { username: "8a1_34", password: "08032013", role: "student", name: "Nguyễn Phước Thịnh", dob: "08/03/2013" },
+            { username: "8a1_35", password: "15072013", role: "student", name: "Nguyễn Hoàng Thùy", dob: "15/07/2013" },
+            { username: "8a1_36", password: "25102013", role: "student", name: "Nguyễn Ngô Kỳ Thư", dob: "25/10/2013" },
+            { username: "8a1_37", password: "26012013", role: "student", name: "Võ Trần Minh Thư", dob: "26/01/2013" },
+            { username: "8a1_38", password: "04102013", role: "student", name: "Lê Vũ Bích Trâm", dob: "04/10/2013" },
+            { username: "8a1_39", password: "09032013", role: "student", name: "Đỗ Nguyễn Minh Trí", dob: "09/03/2013" },
+            { username: "8a1_40", password: "01012013", role: "student", name: "Phạm Minh Trọng", dob: "01/01/2013" },
+            { username: "8a1_41", password: "31052013", role: "student", name: "Trịnh Nguyên Va", dob: "31/05/2013" },
+            { username: "8a1_42", password: "19052013", role: "student", name: "Đỗ Ngọc Tường Vy", dob: "19/05/2013" },
+            { username: "8a1_43", password: "21082013", role: "student", name: "Dương Ngọc Hoàng Yến", dob: "21/08/2013" }
+        ];
+
+        const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+        function generate15QuestionsByChapter(chapter) {
+            let questions = [];
+
+            if (chapter === "Chương I: Đa thức") {
+                for (let i = 1; i <= 6; i++) {
+                    let a = rand(2, 9), b = rand(2, 5);
+                    questions.push({
+                        level: "Nhận biết",
+                        question: `Bậc của đơn thức $${a}x^${b}y^3$ là bao nhiêu?`,
+                        options: [`$${b + 3}$`, `$${b}$`, `$3$`, `$${a}$`],
+                        answer: 0,
+                        explain: `Bậc bằng $${b} + 3 = ${b + 3}$.`
+                    });
+                }
+                for (let i = 1; i <= 5; i++) {
+                    let k = rand(2, 8);
+                    questions.push({
+                        level: "Thông hiểu",
+                        question: `Thu gọn đa thức $P = ${k}x^2y + 3xy - ${k}x^2y + 2xy$ ta được:`,
+                        options: [`$5xy$`, `$${2*k}x^2y + 5xy$`, `$5x^2y$`, `$xy$`],
+                        answer: 0,
+                        explain: `$P = 5xy$.`
+                    });
+                }
+                for (let i = 1; i <= 4; i++) {
+                    let m = rand(2, 6);
+                    questions.push({
+                        level: "Vận dụng",
+                        question: `Tìm $x$ biết $x(x - ${m}) + ${m}x - ${m*m} = 0$:`,
+                        options: [`$x = ${m}$ hoặc $x = -${m}$`, `$x = ${m}$`, `$x = -${m}$`, `$x = 0$`],
+                        answer: 0,
+                        explain: `$x = \\pm ${m}$.`
+                    });
+                }
+            } 
+            else if (chapter === "Chương II: Hằng đẳng thức đáng nhớ") {
+                for (let i = 1; i <= 6; i++) {
+                    let k = rand(2, 9);
+                    questions.push({
+                        level: "Nhận biết",
+                        question: `Khai triển hằng đẳng thức $(x - ${k})^2$ ta được:`,
+                        options: [`$x^2 - ${2*k}x + ${k*k}$`, `$x^2 - ${k*k}$`, `$x^2 + ${2*k}x + ${k*k}$`, `$x^2 - ${k}x + ${k*k}$`],
+                        answer: 0,
+                        explain: `$(x - ${k})^2 = x^2 - ${2*k}x + ${k*k}$.`
+                    });
+                }
+                for (let i = 1; i <= 5; i++) {
+                    let a = rand(101, 109);
+                    let diff = a - 100;
+                    questions.push({
+                        level: "Thông hiểu",
+                        question: `Giá trị của biểu thức $x^2 - ${2*diff}x + ${diff*diff}$ tại $x = ${a}$ là:`,
+                        options: [`$10000$`, `$10404$`, `$100$`, `$1000$`],
+                        answer: 0,
+                        explain: `$(x - ${diff})^2 = 100^2 = 10000$.`
+                    });
+                }
+                for (let i = 1; i <= 4; i++) {
+                    let m = rand(1, 5);
+                    questions.push({
+                        level: "Vận dụng",
+                        question: `Giá trị nhỏ nhất của biểu thức $A = x^2 - ${2*m}x + ${m*m + 3}$ là:`,
+                        options: [`$3$`, `$${m*m + 3}$`, `$${m}$`, `$0$`],
+                        answer: 0,
+                        explain: `$A \\ge 3$.`
+                    });
+                }
+            } 
+            else if (chapter === "Chương III: Tứ giác") {
+                for (let i = 1; i <= 6; i++) {
+                    questions.push({
+                        level: "Nhận biết",
+                        question: "Tổng các góc trong một tứ giác bằng bao nhiêu độ?",
+                        options: ["$360^\\circ$", "$180^\\circ$", "$90^\\circ$", "$270^\\circ$"],
+                        answer: 0,
+                        explain: "Tổng các góc bằng $360^\\circ$."
+                    });
+                }
+                for (let i = 1; i <= 5; i++) {
+                    questions.push({
+                        level: "Thông hiểu",
+                        question: "Hình bình hành có một góc vuông là hình gì?",
+                        options: ["Hình chữ nhật", "Hình thoi", "Hình vuông", "Hình thang cân"],
+                        answer: 0,
+                        explain: "Là hình chữ nhật."
+                    });
+                }
+                for (let i = 1; i <= 4; i++) {
+                    questions.push({
+                        level: "Vận dụng",
+                        question: "Cho hình thoi $ABCD$ có $AC = 6\\text{cm}, BD = 8\\text{cm}$. Cạnh hình thoi bằng:",
+                        options: ["$5\\text{cm}$", "$10\\text{cm}$", "$7\\text{cm}$", "$14\\text{cm}$"],
+                        answer: 0,
+                        explain: "$a = \\sqrt{3^2 + 4^2} = 5\\text{cm}$."
+                    });
+                }
+            } 
+            else {
+                for (let i = 1; i <= 6; i++) {
+                    let k = rand(2, 9);
+                    questions.push({
+                        level: "Nhận biết",
+                        question: `Điều kiện xác định của phân thức $\\frac{x + 1}{x - ${k}}$ là:`,
+                        options: [`$x \\neq ${k}$`, `$x \\neq -1$`, `$x = ${k}$`, `$x \\neq 0$`],
+                        answer: 0,
+                        explain: `$x \\neq ${k}$.`
+                    });
+                }
+                for (let i = 1; i <= 5; i++) {
+                    let a = rand(2, 5);
+                    questions.push({
+                        level: "Thông hiểu",
+                        question: `Rút gọn phân thức $\\frac{${a}x + ${a}y}{x^2 - y^2}$ ta được:`,
+                        options: [`$\\frac{${a}}{x-y}$`, `$\\frac{${a}}{x+y}$`, `$\\frac{1}{x-y}$`, `$${a}(x-y)$`],
+                        answer: 0,
+                        explain: `$\\frac{${a}}{x-y}$.`
+                    });
+                }
+                for (let i = 1; i <= 4; i++) {
+                    let m = rand(2, 5);
+                    questions.push({
+                        level: "Vận dụng",
+                        question: `Tìm $x \\in \\mathbb{Z}$ để phân thức $\\frac{${m}}{x - 1}$ nhận giá trị nguyên:`,
+                        options: [`$x \\in \\{2, 0, ${m+1}, 1-${m}\\}$`, `$x \\in \\{1, ${m}\\}$`, `$x \\in \\{2, ${m+1}\\}$`, `$x \\in \\{0, 2\\}$`],
+                        answer: 0,
+                        explain: `$x - 1 \\in \\text{Ư}(${m})$.`
+                    });
+                }
+            }
+
+            return questions.sort(() => 0.5 - Math.random());
+        }
+
+        let generated20Exams = [];
+        let activeStudentExam = null;
+        let currentUserData = null;
+        let showAnswers = false;
+        let examTimer = null;
+        let studentAnswers = {};
+        let startTime = null; // Thời điểm học sinh bấm bắt đầu làm bài
+
+        const loginCard = document.getElementById('loginCard');
+        const mainContent = document.getElementById('mainContent');
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+        const btnLogout = document.getElementById('btnLogout');
+        
+        const btnGenerateExam = document.getElementById('btnGenerateExam');
+        const btnPublishExam = document.getElementById('btnPublishExam');
+        const btnToggleAnswers = document.getElementById('btnToggleAnswers');
+        const chapterSelect = document.getElementById('chapterSelect');
+
+        function renderMathText(text) {
+            const parts = text.split(/\$(.*?)\$/g);
+            return parts.map((part, index) => {
+                if (index % 2 === 1) {
+                    try { return katex.renderToString(part, { throwOnError: false }); } 
+                    catch (e) { return part; }
+                }
+                return part;
+            }).join('');
+        }
+
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const uInput = document.getElementById('username').value.trim();
+            const pInput = document.getElementById('password').value.trim();
+
+            const user = USERS.find(u => u.username === uInput && u.password === pInput);
+            if (user) {
+                currentUserData = user;
+                loginError.classList.add('hidden');
+                showDashboard(user);
+            } else {
+                loginError.classList.remove('hidden');
+            }
+        });
+
+        function showDashboard(user) {
+            loginCard.classList.add('hidden');
+            mainContent.classList.remove('hidden');
+
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userRole').textContent = user.role === 'teacher' ? 'Giáo viên' : 'Học sinh 8A1';
+
+            if (user.role === 'teacher') {
+                document.getElementById('teacherView').classList.remove('hidden');
+                document.getElementById('studentView').classList.add('hidden');
+                checkActiveExamStatus();
+                renderTeacherScoreboard();
+            } else {
+                document.getElementById('studentView').classList.remove('hidden');
+                document.getElementById('teacherView').classList.add('hidden');
+                initStudentExamScreen();
+            }
+        }
+
+        btnLogout.addEventListener('click', function() {
+            if (examTimer) clearInterval(examTimer);
+            mainContent.classList.add('hidden');
+            loginCard.classList.remove('hidden');
+            loginForm.reset();
+        });
+
+        // GIÁO VIÊN: Sinh đề
+        btnGenerateExam.addEventListener('click', function() {
+            const selectedChapter = chapterSelect.value;
+            generated20Exams = [];
+
+            for (let i = 1; i <= 20; i++) {
+                let rawQuestions = generate15QuestionsByChapter(selectedChapter);
+
+                let processedQuestions = rawQuestions.map(q => {
+                    let optionsWithIndex = q.options.map((opt, idx) => ({ text: opt, isCorrect: idx === q.answer }));
+                    optionsWithIndex.sort(() => 0.5 - Math.random());
+                    
+                    return {
+                        ...q,
+                        options: optionsWithIndex.map((item, idx) => `${String.fromCharCode(65 + idx)}. ${item.text}`),
+                        answer: optionsWithIndex.findIndex(item => item.isCorrect)
+                    };
+                });
+
+                generated20Exams.push({
+                    examId: i,
+                    title: `Đề thi số ${i} (${selectedChapter})`,
+                    questions: processedQuestions
+                });
+            }
+
+            showAnswers = false;
+            btnToggleAnswers.textContent = "👁️ Hiện đáp án & Lời giải";
+            renderExamPreview();
+            btnPublishExam.classList.remove('hidden');
+        });
+
+        function renderExamPreview() {
+            document.getElementById('emptyPreview').classList.add('hidden');
+            document.getElementById('previewContent').classList.remove('hidden');
+
+            const qContainer = document.getElementById('questionsList');
+            qContainer.innerHTML = '';
+
+            const previewExam = generated20Exams[0];
+
+            previewExam.questions.forEach((q, idx) => {
+                const qBox = document.createElement('div');
+                qBox.className = "p-4 border rounded-lg bg-gray-50/50";
+
+                let optionsHTML = q.options.map(opt => `<div class="text-gray-700">${renderMathText(opt)}</div>`).join('');
+
+                let answerHTML = '';
+                if (showAnswers) {
+                    answerHTML = `
+                        <div class="mt-3 p-3 bg-amber-50 rounded border border-amber-200 text-sm">
+                            <span class="font-bold text-amber-900">Đáp án chuẩn: ${q.options[q.answer].substring(0, 1)}</span>
+                            <p class="text-gray-700 mt-1"><b>Giải thích:</b> ${renderMathText(q.explain)}</p>
+                        </div>
+                    `;
+                }
+
+                const levelBadge = q.level === 'Vận dụng' 
+                    ? '<span class="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded font-bold">Vận dụng (Khá-Giỏi)</span>'
+                    : '<span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">' + q.level + '</span>';
+
+                qBox.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="font-semibold text-gray-800">Câu ${idx + 1}: ${renderMathText(q.question)}</p>
+                        ${levelBadge}
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pl-4">${optionsHTML}</div>
+                    ${answerHTML}
+                `;
+
+                qContainer.appendChild(qBox);
+            });
+        }
+
+        btnToggleAnswers.addEventListener('click', function() {
+            showAnswers = !showAnswers;
+            btnToggleAnswers.textContent = showAnswers ? "🙈 Ẩn đáp án" : "👁️ Hiện đáp án & Lời giải";
+            renderExamPreview();
+        });
+
+        btnPublishExam.addEventListener('click', function() {
+            if (generated20Exams.length === 0) return;
+
+            const examPackage = {
+                title: `Bộ 20 Đề Kiểm Tra 15 Phút - ${chapterSelect.value}`,
+                createdTime: new Date().toLocaleTimeString('vi-VN'),
+                exams: generated20Exams
+            };
+
+            localStorage.setItem("publishedExamPackage", JSON.stringify(examPackage));
+            checkActiveExamStatus();
+            alert(`🚀 Đã xuất bản thành công Bộ 20 Đề Thi cho Lớp 8A1!`);
+        });
+
+        function checkActiveExamStatus() {
+            const saved = localStorage.getItem("publishedExamPackage");
+            if (saved) {
+                const pkg = JSON.parse(saved);
+                document.getElementById('activeExamStatus').classList.remove('hidden');
+                document.getElementById('activeExamInfo').innerHTML = `<b>Trạng thái:</b> ${pkg.title} <i>(Lúc: ${pkg.createdTime})</i>`;
+            }
+        }
+
+        // BẢNG ĐIỂM DÀNH CHO GIÁO VIÊN
+        function renderTeacherScoreboard() {
+            const tbody = document.getElementById('scoreboardBody');
+            tbody.innerHTML = '';
+
+            const studentList = USERS.filter(u => u.role === 'student');
+
+            studentList.forEach((st, idx) => {
+                const historyKey = `history_${st.username}`;
+                const history = JSON.parse(localStorage.getItem(historyKey) || '{"attempts": 0, "highestScore": null, "timeTaken": "--"}');
+
+                const tr = document.createElement('tr');
+                tr.className = "bg-white border-b hover:bg-slate-50";
+
+                let scoreBadge = history.highestScore !== null 
+                    ? `<span class="font-bold text-emerald-600">${history.highestScore}/10</span>` 
+                    : `<span class="text-gray-400 font-italic">Chưa thi</span>`;
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3 text-center font-medium text-gray-900">${idx + 1}</td>
+                    <td class="px-4 py-3 font-semibold text-gray-800">${st.name}</td>
+                    <td class="px-4 py-3 text-center text-gray-500">${st.dob}</td>
+                    <td class="px-4 py-3 text-center">${history.attempts}/2</td>
+                    <td class="px-4 py-3 text-center">${scoreBadge}</td>
+                    <td class="px-4 py-3 text-center text-gray-600">${history.timeTaken}</td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('btnRefreshScoreboard').addEventListener('click', renderTeacherScoreboard);
+
+        // HỌC SINH: Chuẩn bị làm bài
+        function initStudentExamScreen() {
+            const saved = localStorage.getItem("publishedExamPackage");
+            if (!saved) {
+                document.getElementById('noExamMessage').classList.remove('hidden');
+                document.getElementById('examStartCard').classList.add('hidden');
+                document.getElementById('examArea').classList.add('hidden');
+                document.getElementById('resultArea').classList.add('hidden');
+                return;
+            }
+
+            const pkg = JSON.parse(saved);
+            document.getElementById('noExamMessage').classList.add('hidden');
+            document.getElementById('examArea').classList.add('hidden');
+            document.getElementById('resultArea').classList.add('hidden');
+            document.getElementById('examStartCard').classList.remove('hidden');
+
+            document.getElementById('studentExamTitle').textContent = pkg.title;
+
+            const historyKey = `history_${currentUserData.username}`;
+            const history = JSON.parse(localStorage.getItem(historyKey) || '{"attempts": 0, "highestScore": null}');
+
+            document.getElementById('attemptsCount').textContent = `${history.attempts}/2`;
+            document.getElementById('highestScore').textContent = history.highestScore !== null ? `${history.highestScore}/10` : "Chưa có";
+
+            if (history.attempts >= 2) {
+                document.getElementById('btnStartExam').classList.add('hidden');
+                document.getElementById('maxAttemptsWarning').classList.remove('hidden');
+            } else {
+                document.getElementById('btnStartExam').classList.remove('hidden');
+                document.getElementById('maxAttemptsWarning').classList.add('hidden');
+            }
+        }
+
+        document.getElementById('btnStartExam').addEventListener('click', function() {
+            const saved = localStorage.getItem("publishedExamPackage");
+            if (!saved) return;
+
+            const pkg = JSON.parse(saved);
+            const randomExam = pkg.exams[Math.floor(Math.random() * pkg.exams.length)];
+
+            let questionsForThisAttempt = [...randomExam.questions].sort(() => 0.5 - Math.random());
+
+            activeStudentExam = {
+                title: `${pkg.title} - ${randomExam.title}`,
+                questions: questionsForThisAttempt
+            };
+
+            document.getElementById('examStartCard').classList.add('hidden');
+            document.getElementById('examArea').classList.remove('hidden');
+            document.getElementById('currentAttemptTitle').textContent = activeStudentExam.title;
+
+            studentAnswers = {};
+            startTime = new Date(); // Đánh dấu thời điểm bắt đầu
+
+            const qContainer = document.getElementById('studentQuestionsList');
+            qContainer.innerHTML = '';
+
+            activeStudentExam.questions.forEach((q, idx) => {
+                const qBox = document.createElement('div');
+                qBox.className = "p-4 border rounded-xl bg-white shadow-sm hover:border-blue-300";
+
+                let optionsHTML = q.options.map((opt, optIdx) => `
+                    <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-blue-50 transition">
+                        <input type="radio" name="question_${idx}" value="${optIdx}" onchange="selectStudentAnswer(${idx}, ${optIdx})" class="w-4 h-4 text-blue-600">
+                        <span class="text-gray-700 text-sm">${renderMathText(opt)}</span>
+                    </label>
+                `).join('');
+
+                qBox.innerHTML = `
+                    <p class="font-semibold text-gray-800 mb-3">Câu ${idx + 1}: ${renderMathText(q.question)}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">${optionsHTML}</div>
+                `;
+
+                qContainer.appendChild(qBox);
+            });
+
+            startExamTimer(15 * 60);
+        });
+
+        window.selectStudentAnswer = function(qIdx, optIdx) {
+            studentAnswers[qIdx] = optIdx;
+        };
+
+        function startExamTimer(seconds) {
+            if (examTimer) clearInterval(examTimer);
+            let timeLeft = seconds;
+            const timerEl = document.getElementById('timer');
+
+            examTimer = setInterval(() => {
+                const min = Math.floor(timeLeft / 60);
+                const sec = timeLeft % 60;
+                timerEl.textContent = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(examTimer);
+                    alert("⏱️ Hết thời gian làm bài! Hệ thống tự động nộp bài.");
+                    submitStudentExam();
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        document.getElementById('btnSubmitExam').addEventListener('click', function() {
+            if (confirm("Bạn có chắc chắn muốn nộp bài kiểm tra không?")) {
+                submitStudentExam();
+            }
+        });
+
+        function submitStudentExam() {
+            if (examTimer) clearInterval(examTimer);
+
+            // Tính thời gian hoàn thành bài kiểm tra
+            const endTime = new Date();
+            const timeDiffSeconds = Math.floor((endTime - startTime) / 1000);
+            const minutesTaken = Math.floor(timeDiffSeconds / 60);
+            const secondsTaken = timeDiffSeconds % 60;
+            const timeString = `${minutesTaken < 10 ? '0' : ''}${minutesTaken} phút ${secondsTaken < 10 ? '0' : ''}${secondsTaken} giây`;
+
+            let correctCount = 0;
+            const totalQuestions = activeStudentExam.questions.length;
+
+            activeStudentExam.questions.forEach((q, idx) => {
+                if (studentAnswers[idx] === q.answer) {
+                    correctCount++;
+                }
+            });
+
+            const currentScore = parseFloat(((correctCount / totalQuestions) * 10).toFixed(1));
+
+            const historyKey = `history_${currentUserData.username}`;
+            const history = JSON.parse(localStorage.getItem(historyKey) || '{"attempts": 0, "highestScore": null, "timeTaken": "--"}');
+            
+            history.attempts += 1;
+            if (history.highestScore === null || currentScore > history.highestScore) {
+                history.highestScore = currentScore;
+                history.timeTaken = timeString; // Cập nhật thời gian tương ứng với điểm cao nhất
+            }
+
+            localStorage.setItem(historyKey, JSON.stringify(history));
+
+            document.getElementById('examArea').classList.add('hidden');
+            document.getElementById('resultArea').classList.remove('hidden');
+            document.getElementById('finalScore').textContent = `${currentScore}/10`;
+            document.getElementById('timeTakenDetail').textContent = `⏱️ Thời gian làm bài: ${timeString}`;
+            document.getElementById('correctDetail').textContent = `Trả lời đúng: ${correctCount}/${totalQuestions} câu (Lượt làm thứ ${history.attempts}/2)`;
+        }
+
+        document.getElementById('btnReturnHome').addEventListener('click', function() {
+            initStudentExamScreen();
+        });
+    </script>
+</body>
+</html>
